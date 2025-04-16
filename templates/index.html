@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Research Paper Summarizer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: #1e293b;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: linear-gradient(345deg, #f8fafc, #f0f7ff);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+/* Title */
+.title {
+    text-align: center;
+    color: #60a5fa;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #60a5fa33, #ec489933);
+    border-radius: 8px;
+}
+
+/* Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Input Section */
+.input-section {
+    background: linear-gradient(135deg, #f8fafc, #e0f2fe);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(96, 165, 250, 0.2);
+}
+
+.input-mode {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px;
+}
+
+.input-mode label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #475569;
+}
+
+.input-mode input[type="radio"] {
+    accent-color: #ec4899;
+}
+
+.text-area {
+    flex-grow: 1;
+    min-height: 300px;
+    padding: 15px;
+    border-radius: 8px;
+    resize: none;
+    font-size: 1rem;
+    color: #1e293b;
+    border: 1px solid transparent;
+    background: linear-gradient(#ffffff, #fff7fc);
+    margin-bottom: 15px;
+}
+
+.text-area:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+}
+
+.text-area::placeholder {
+    color: #6b7280;
+}
+
+/* Upload Section */
+.upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    background: linear-gradient(45deg, #e0f2fe, #fce7f3);
+    border: 2px dashed #93c5fd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #1e40af;
+    transition: all 0.3s;
+}
+
+.upload-label:hover {
+    background: linear-gradient(45deg, #dbeafe, #fce7f3);
+    border-color: #60a5fa;
+    color: #ec4899;
+}
+
+.pdf-info {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #475569;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* Input Footer */
+.input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-top: 1px solid #dbeafe;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 10px 10px;
+}
+
+.word-count, .char-count {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.summarize-button {
+    background: linear-gradient(90deg, #60a5fa, #ec4899);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.summarize-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+}
+
+.summarize-button:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+    color: #f87171;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* Output Section */
+.output-section {
+    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.output-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(96, 165, 250, 0.2);
+}
+
+.output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 6px 6px 0 0;
+}
+
+.output-title {
+    color: #1e40af;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.status-message {
+    font-size: 0.9rem;
+    color: #64748b;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.summary-output {
+    flex-grow: 1;
+    min-height: 300px;
+    padding: 15px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: linear-gradient(#ffffff, #fffbeb);
+    overflow-y: auto;
+    margin-bottom: 15px;
+    color: #1e293b;
+}
+
+.summary-output .placeholder {
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Output Footer */
+.output-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid #dbeafe;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 10px 10px;
+}
+
+.action-button {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #e0f2fe, #fce7f3);
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    color: #1e40af;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button:hover {
+    background: linear-gradient(45deg, #dbeafe, #fce7f3);
+    color: #ec4899;
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.toast.success {
+    background: linear-gradient(45deg, #2dd4bf, #5eead4);
+    color: #1e293b;
+}
+
+.toast.error {
+    background: linear-gradient(45deg, #f87171, #fca5a5);
+    color: #1e293b;
+}
+
+    #summaryLength {
+        margin-right: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-weight: 500;
+        border: 1px solid #93c5fd;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 0.95rem;
+    }
+    
+    /* Custom style for dropdown */
+    #summaryLength {
+        margin-right: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-weight: 500;
+        border: 1px solid #93c5fd;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 0.95rem;
+    }
+
+    /* Language selector styles */
+    #summaryLanguage {
+        margin-right: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-weight: 500;
+        border: 1px solid #93c5fd;
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 0.95rem;
+    }
+
+    .input-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Research Paper Summarizer</h1>
+    <div class="grid-container">
+      <!-- Input Section -->
+      <div class="input-section">
+        <div class="input-mode">
+          <label>
+            <input type="radio" name="inputType" value="text" checked> Enter Text
+          </label>
+          <label>
+            <input type="radio" name="inputType" value="pdf"> Upload PDF
+          </label>
+        </div>
+
+        <textarea id="inputText" class="text-area" placeholder="Paste research text here..."></textarea>
+
+        <div class="upload-section">
+          <label for="pdfUpload" class="upload-label">
+            <i class="fas fa-file-pdf"></i> Upload Research Paper (PDF)
+            <input type="file" id="pdfUpload" accept=".pdf" hidden />
+          </label>
+          <div id="pdfInfo" class="pdf-info"></div>
+        </div>
+
+        <div class="input-footer">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <select id="summaryLength" title="Select summary length">
+              <option value="short">🔹 Short</option>
+              <option value="medium" selected>🔸 Medium</option>
+              <option value="long">🔶 Long</option>
+            </select>
+            <select id="summaryLanguage" title="Select summary language">
+              <option value="en">🇬🇧 English</option>
+              <option value="hi">🇮🇳 Hindi</option>
+              <option value="mr">🇮🇳 Marathi</option>
+              <option value="es">🇪🇸 Spanish</option>
+              <option value="fr">🇫🇷 French</option>
+              <option value="de">🇩🇪 German</option>
+              <option value="zh">🇨🇳 Chinese</option>
+              <option value="ja">🇯🇵 Japanese</option>
+              <option value="ar">🇸🇦 Arabic</option>
+            </select>
+            <div>
+              <span id="wordCount" class="word-count">0 words</span>
+              <span id="charCount" class="char-count">0 characters</span>
+            </div>
+          </div>
+          <button id="summarizeBtn" class="summarize-button">
+            <i class="fas fa-magic"></i> Summarize
+          </button>
+        </div>
+        <div id="inputError" class="error-message"></div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="output-section">
+        <div class="output-header">
+          <h2 class="output-title"><i class="fas fa-file-alt"></i> Summary</h2>
+          <div id="summaryStatus" class="status-message"></div>
+        </div>
+        <div id="summaryOutput" class="summary-output">
+          <p class="placeholder">Summary will appear here...</p>
+        </div>
+        <div class="output-footer">
+          <button id="copyBtn" class="action-button" disabled>
+            <i class="fas fa-copy"></i> Copy
+          </button>
+          <button id="downloadBtn" class="action-button" disabled>
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const inputText = document.getElementById('inputText');
+    const wordCount = document.getElementById('wordCount');
+    const charCount = document.getElementById('charCount');
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    const summaryOutput = document.getElementById('summaryOutput');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const inputError = document.getElementById('inputError');
+    const summaryStatus = document.getElementById('summaryStatus');
+    const pdfUpload = document.getElementById('pdfUpload');
+    const pdfInfo = document.getElementById('pdfInfo');
+    const inputTypeRadios = document.querySelectorAll('input[name="inputType"]');
+    const uploadSection = document.querySelector('.upload-section');
+    const summaryLength = document.getElementById('summaryLength');
+    const summaryLanguage = document.getElementById('summaryLanguage');
+
+    // Constants
+    const MIN_CHAR_LENGTH = 100;
+    const API_BASE_URL = "http://127.0.0.1:5000";
+    const API_SUMMARY_ENDPOINT = `${API_BASE_URL}/api/summarize`;
+    const API_PDF_TEXT_ENDPOINT = `${API_BASE_URL}/api/extract-text`;
+
+    // Language names for display
+    const languageNames = {
+      en: "English",
+      hi: "Hindi",
+      mr: "Marathi",
+      es: "Spanish",
+      fr: "French",
+      de: "German",
+      zh: "Chinese",
+      ja: "Japanese",
+      ar: "Arabic"
+    };
+
+    // Init
+    uploadSection.style.display = 'none';
+
+    // Event Listeners
+    inputTypeRadios.forEach(radio => radio.addEventListener('change', handleInputTypeChange));
+    inputText.addEventListener('input', updateCounters);
+    pdfUpload.addEventListener('change', handlePdfUpload);
+    summarizeBtn.addEventListener('click', handleSummarize);
+    copyBtn.addEventListener('click', copySummary);
+    downloadBtn.addEventListener('click', downloadSummary);
+
+    function handleInputTypeChange(e) {
+      if (e.target.value === 'pdf') {
+        inputText.style.display = 'none';
+        uploadSection.style.display = 'block';
+        inputText.value = '';
+        updateCounters();
+      } else {
+        inputText.style.display = 'block';
+        uploadSection.style.display = 'none';
+        pdfUpload.value = '';
+        pdfInfo.textContent = '';
+      }
+    }
+
+    function updateCounters() {
+      const text = inputText.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      const chars = text.length;
+      wordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+      charCount.textContent = `${chars} character${chars !== 1 ? 's' : ''}`;
+      validateInput(text);
+    }
+
+    function validateInput(text) {
+      if (text.length > 0 && text.length < MIN_CHAR_LENGTH) {
+        inputError.textContent = `Minimum ${MIN_CHAR_LENGTH} characters required`;
+        summarizeBtn.disabled = true;
+      } else {
+        inputError.textContent = '';
+        summarizeBtn.disabled = false;
+      }
+    }
+
+    async function handlePdfUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) return showPdfError('File exceeds 10MB');
+
+      showPdfLoading(file.name);
+      try {
+        const text = await extractTextFromPDF(file);
+        inputText.value = text;
+        updateCounters();
+        showPdfSuccess();
+      } catch (error) {
+        showPdfError(error.message);
+      }
+    }
+
+    async function extractTextFromPDF(file) {
+      const formData = new FormData();
+      formData.append('pdf', file);
+      const response = await fetch(API_PDF_TEXT_ENDPOINT, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed');
+      return data.text;
+    }
+
+    async function handleSummarize() {
+      const text = inputText.value.trim();
+      const length = summaryLength.value;
+      const language = summaryLanguage.value;
+      if (!text || text.length < MIN_CHAR_LENGTH) return;
+
+      try {
+        showLoadingState(language);
+        const response = await fetch(API_SUMMARY_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, length, language })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Summarization failed');
+        showSummary(data.summary, language);
+      } catch (error) {
+        showSummaryError(error.message);
+      } finally {
+        hideLoadingState();
+      }
+    }
+
+    function showLoadingState(language) {
+      summarizeBtn.disabled = true;
+      const languageName = languageNames[language] || 'English';
+      summaryStatus.innerHTML = `<i class="fas fa-spinner spinner"></i> Generating ${languageName} summary...`;
+      summaryOutput.innerHTML = '<p class="placeholder">Processing...</p>';
+    }
+
+    function hideLoadingState() {
+      summarizeBtn.disabled = false;
+      summaryStatus.textContent = '';
+    }
+
+    function showSummary(summary, language) {
+      summaryOutput.innerHTML = formatSummary(summary);
+      copyBtn.disabled = false;
+      downloadBtn.disabled = false;
+      const languageName = languageNames[language] || 'English';
+      summaryStatus.innerHTML = `<i class="fas fa-check-circle"></i> ${languageName} summary generated`;
+    }
+
+    function showSummaryError(message) {
+      summaryOutput.innerHTML = `<p class="error"><i class="fas fa-exclamation-triangle"></i> ${message}</p>`;
+      summaryStatus.innerHTML = `<i class="fas fa-times-circle"></i> Error generating summary`;
+    }
+
+    function formatSummary(summary) {
+      if (!summary) return '<p class="placeholder">No summary generated</p>';
+      return summary
+        .split('\n')
+        .map(line => (line ? `<p>${line}</p>` : ''))
+        .join('');
+    }
+
+    function showPdfLoading(filename) {
+      pdfInfo.innerHTML = `<span class="loading"><i class="fas fa-spinner"></i> Processing ${filename}...</span>`;
+      summarizeBtn.disabled = true;
+    }
+
+    function showPdfSuccess() {
+      pdfInfo.innerHTML = `<span class="success"><i class="fas fa-check-circle"></i> PDF ready</span>`;
+      summarizeBtn.disabled = false;
+    }
+
+    function showPdfError(message) {
+      pdfInfo.innerHTML = `<span class="error"><i class="fas fa-exclamation-circle"></i> ${message}</span>`;
+      summarizeBtn.disabled = true;
+    }
+
+    function copySummary() {
+      navigator.clipboard.writeText(summaryOutput.innerText)
+        .then(() => showToast('Summary copied!'))
+        .catch(() => showToast('Copy failed', true));
+    }
+
+    function downloadSummary() {
+      const text = summaryOutput.innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'summary.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${isError ? 'error' : 'success'}`;
+      toast.innerHTML = `<i class="fas ${isError ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${message}`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
